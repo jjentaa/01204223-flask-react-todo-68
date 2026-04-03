@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from flask_bcrypt import generate_password_hash, check_password_hash
 
 class Base(DeclarativeBase):
     pass
@@ -41,3 +42,15 @@ class Comment(db.Model):
             "message": self.message,
             "todo_id": self.todo_id
         }
+
+class User(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(100), unique=True)
+    full_name: Mapped[str] = mapped_column(String(200))
+    hashed_password: Mapped[str] = mapped_column(String(100))
+
+    def set_password(self, password):
+        self.hashed_password = generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        return check_password_hash(self.hashed_password, password)
